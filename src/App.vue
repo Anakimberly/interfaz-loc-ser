@@ -29,37 +29,73 @@
         </div>
         <input type="text" placeholder="Servicio a ofrecer" v-model="form2.servicio" required />
         <input type="text" placeholder="Experiencia" v-model="form2.experiencia" required />
+        <input type="text" placeholder="ID de billetera (opcional)" v-model="form2.walletId" />
         <button class="submit-btn" type="submit">Añadir servicio</button>
-        <button class="connect-btn" type="button" @click="conectarFreighter(2)">Conectar Freighter Wallet</button>
+        <button 
+          class="connect-btn" 
+          type="button" 
+          @click="conectarFreighter"
+          :disabled="isConnecting || walletConnected"
+        >
+          {{ walletConnected ? 'Reconectar Freighter Wallet' : isConnecting ? 'Conectando...' : 'Conectar Freighter Wallet' }}
+        </button>
       </form>
+      <!-- Apartado de estado de conexión  -->
+      <div v-if="walletConnected" class="connection-status">
+        <p>Conectado como: {{ publicKey ? `${publicKey.slice(0, 3)}...${publicKey.slice(-4)}` : 'XXX...YYYY' }}</p>
+        <p>Balance XLM: {{ balance }} XLM</p>
+      </div>
     </section>
   </div>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue';
 
+// Estados para el primer formulario
 const form1 = reactive({
   nombre: '',
   correo: '',
   servicio: '',
   experiencia: '',
   disponibilidad: ''
-})
+});
 
+// Estados para el segundo formulario
 const form2 = reactive({
   nombre: '',
   apellido: '',
   servicio: '',
-  experiencia: ''
-})
+  experiencia: '',
+  walletId: ''
+});
 
-function registrarServicio(numero) {
-  alert(`Formulario ${numero}: Servicio registrado correctamente (simulado).`)
+// Estados para la conexión 
+const publicKey = ref('');
+const walletConnected = ref(false);
+const isConnecting = ref(false);
+const balance = ref('10.00');
+
+//  conectar Freighter
+function conectarFreighter() {
+  isConnecting.value = true;
+  setTimeout(() => {
+    publicKey.value = 'GABC1234567890XYZ'; 
+    walletConnected.value = true;
+    isConnecting.value = false;
+  }, 1000); 
 }
 
-function conectarFreighter(numero) {
-  alert(`Formulario ${numero}: Conectando a Freighter Wallet (simulado)...`)
+// Función para registrar servicios
+function registrarServicio(numero) {
+  if (numero === 1) {
+    alert(`Formulario ${numero}: Servicio registrado correctamente .`);
+    return;
+  }
+
+  if (numero === 2) {
+    alert(`Formulario ${numero}: Servicio registrado correctamente (${walletConnected.value ? ' con blockchain' : ''}).`);
+  }
 }
 </script>
 
@@ -96,7 +132,11 @@ button.connect-btn {
   font-size: 16px;
   cursor: pointer;
   margin-top: 20px;
-  margin-bottom: 20px;
+}
+
+button.connect-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
 input,
@@ -136,5 +176,15 @@ button.submit-btn:hover {
 
 .espacio {
   margin-top: 60px;
+}
+
+.connection-status {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #e0f7fa;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 14px;
+  color: #00695c;
 }
 </style>
